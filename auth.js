@@ -1,11 +1,15 @@
-const GOOGLE_CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = CONFIG.GOOGLE_CLIENT_ID;
 
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly profile email';
+
+function getBasePath() {
+  return window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+}
 
 function initiateGoogleLogin() {
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
-    redirect_uri: window.location.origin + '/index.html',
+    redirect_uri: getBasePath() + 'callback.html',
     response_type: 'token',
     scope: SCOPES,
     include_granted_scopes: 'true',
@@ -15,7 +19,7 @@ function initiateGoogleLogin() {
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
 }
 
-// Runs on page load — picks up the token Google drops in the URL hash after redirect
+// Picks up the token from the URL hash after Google redirects to callback.html
 function handleOAuthRedirect() {
   const hash = window.location.hash.substring(1);
   if (!hash) return;
@@ -25,7 +29,7 @@ function handleOAuthRedirect() {
   const error = params.get('error');
 
   if (error) {
-    document.getElementById('status-msg').textContent = 'Login was cancelled or failed.';
+    window.location.replace(getBasePath() + 'index.html');
     return;
   }
 
@@ -36,10 +40,7 @@ function handleOAuthRedirect() {
     sessionStorage.setItem('goog_access_token', token);
     sessionStorage.setItem('goog_token_expires', expiresAt);
 
-    // Clean the token out of the URL bar
-    history.replaceState(null, '', window.location.pathname);
-
-    window.location.href = 'app.html';
+    window.location.replace(getBasePath() + 'app.html');
   }
 }
 
@@ -57,7 +58,7 @@ function getToken() {
 function signOut() {
   sessionStorage.removeItem('goog_access_token');
   sessionStorage.removeItem('goog_token_expires');
-  window.location.href = 'index.html';
+  window.location.replace(getBasePath() + 'index.html');
 }
 
 handleOAuthRedirect();

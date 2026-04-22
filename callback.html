@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Signing in...</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg);
+        }
+        .msg {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+<div class="msg">
+    <span class="spinner"></span>
+    Signing you in...
+</div>
+
+<script src="config.js"></script>
+<script src="auth.js"></script>
+</body>
+</html>

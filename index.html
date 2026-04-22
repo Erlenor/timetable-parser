@@ -141,77 +141,78 @@
   </style>
 </head>
 <body>
-  <div class="login-wrap">
-    <div class="card login-card fade-in">
+<div class="login-wrap">
+  <div class="card login-card fade-in">
 
-      <div class="logo">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 2H4a2 2 0 00-2 2v4M8 2h8M8 2v4M16 2h4a2 2 0 012 2v4M16 2v4M2 8v10a2 2 0 002 2h4M2 8h20M22 8v10a2 2 0 01-2 2h-4M8 22v-6M8 22H4M16 22v-6M16 22h4M8 16h8"/>
-        </svg>
-      </div>
-
-      <h1>EduPge to Calendar</h1>
-      <p>Snap or upload your timetable and we'll add all the events straight into your Google Calendar.</p>
-
-      <button class="google-btn" id="login-btn" onclick="startLogin()">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-        Continue with Google
-      </button>
-
-      <div id="status-msg"></div>
-
-      <div class="divider">what you get</div>
-
-      <div class="features">
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-          </div>
-          <span>Photo, screenshot or paste — upload your timetable any way you like</span>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          </div>
-          <span>AI reads the image and extracts every class, time and date automatically</span>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          </div>
-          <span>Events are pushed directly to whichever Google Calendar you choose</span>
-        </div>
-      </div>
-
-      <p class="footer-note">
-        We only request calendar write access. No data is stored on our servers.
-      </p>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 2H4a2 2 0 00-2 2v4M8 2h8M8 2v4M16 2h4a2 2 0 012 2v4M16 2v4M2 8v10a2 2 0 002 2h4M2 8h20M22 8v10a2 2 0 01-2 2h-4M8 22v-6M8 22H4M16 22v-6M16 22h4M8 16h8"/>
+      </svg>
     </div>
+
+    <h1>EduPge to Calendar</h1>
+    <p>Snap or upload your timetable and we'll add all the events straight into your Google Calendar.</p>
+
+    <button class="google-btn" id="login-btn" onclick="startLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+      Continue with Google
+    </button>
+
+    <div id="status-msg"></div>
+
+    <div class="divider">what you get</div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        </div>
+        <span>Photo, screenshot or paste — upload your timetable any way you like</span>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </div>
+        <span>AI reads the image and extracts every class, time and date automatically</span>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <span>Events are pushed directly to whichever Google Calendar you choose</span>
+      </div>
+    </div>
+
+    <p class="footer-note">
+      We only request calendar write access. No data is stored on our servers.
+    </p>
   </div>
+</div>
 
-  <script src="auth.js"></script>
-  <script>
-    // If already signed in, skip to app
-    window.addEventListener('load', () => {
-      const token = sessionStorage.getItem('goog_access_token');
-      if (token) window.location.href = 'app.html';
-    });
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+  // If already signed in, skip to app
+  window.addEventListener('load', () => {
+    const token = sessionStorage.getItem('goog_access_token');
+    if (token) window.location.href = 'app.html';
+  });
 
-    function startLogin() {
-      const btn = document.getElementById('login-btn');
-      const msg = document.getElementById('status-msg');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Connecting...';
-      msg.textContent = '';
+  function startLogin() {
+    const btn = document.getElementById('login-btn');
+    const msg = document.getElementById('status-msg');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Connecting...';
+    msg.textContent = '';
 
-      try {
-        initiateGoogleLogin();
-      } catch (e) {
-        msg.textContent = 'Could not start login. Check your Client ID in auth.js.';
-        btn.disabled = false;
-        btn.innerHTML = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px;" /> Continue with Google`;
-      }
+    try {
+      initiateGoogleLogin();
+    } catch (e) {
+      msg.textContent = 'Could not start login. Check your Client ID in auth.js.';
+      btn.disabled = false;
+      btn.innerHTML = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px;" /> Continue with Google`;
     }
-  </script>
+  }
+</script>
 </body>
 </html>
