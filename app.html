@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPge → Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .app-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-logo svg {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+    }
+
+    .app-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    #user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    #user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: none;
+    }
+
+    /* Calendar selector */
+    .section-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .cal-select-wrap {
+      margin-bottom: 28px;
+    }
+
+    #cal-select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2378766e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      cursor: pointer;
+    }
+
+    #cal-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 40px 24px;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s;
+      cursor: pointer;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .upload-zone-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--surface2);
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .upload-zone-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--text-muted);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .upload-zone h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .upload-zone p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .upload-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: all 0.15s;
+    }
+
+    .upload-btn:hover { background: var(--surface2); border-color: #bbb; }
+
+    .upload-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .upload-btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .upload-btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    #file-input { display: none; }
+    #camera-input { display: none; }
+
+    /* Preview */
+    #preview-wrap {
+      display: none;
+      margin-bottom: 20px;
+    }
+
+    #preview-wrap img {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .preview-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    #preview-name {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 300px;
+    }
+
+    /* Process button */
+    #process-btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    #process-btn:hover { background: var(--accent-hover); }
+    #process-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Status / error */
+    .status-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .status-bar.info { background: var(--accent-light); color: var(--accent); display: flex; }
+    .status-bar.error { background: var(--danger-light); color: var(--danger); display: flex; }
+    .status-bar.success { background: var(--success-light); color: var(--success); display: flex; }
+
+    .status-bar svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Events preview table */
+    #events-section { display: none; }
+
+    .events-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .events-header h3 {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .event-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+    }
+
+    .event-day {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: var(--accent-light);
+      color: var(--accent);
+      white-space: nowrap;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .event-title { font-weight: 500; flex: 1; }
+
+    .event-time {
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .event-location {
+      color: var(--text-muted);
+      font-size: 12px;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #push-btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #push-btn:hover { background: var(--accent-hover); }
+    #push-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Paste hint */
+    .paste-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    kbd {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="app-logo">
+          <svg viewBox="0 0 24 24"><path d="M8 2H4a2 2 0 00-2 2v4M8 2h8M8 2v4M16 2h4a2 2 0 012 2v4M16 2v4M2 8v10a2 2 0 002 2h4M2 8h20M22 8v10a2 2 0 01-2 2h-4M8 22v-6M8 22H4M16 22v-6M16 22h4M8 16h8"/></svg>
+        </div>
+        <span class="app-title">EduPge → Calendar</span>
+      </div>
+      <div id="user-info">
+        <img id="user-avatar" alt="avatar" />
+        <span id="user-name"></span>
+        <button class="btn-ghost" onclick="signOut()" style="padding:6px 12px;">Sign out</button>
+      </div>
+    </div>
+
+    <!-- Calendar picker -->
+    <div class="cal-select-wrap">
+      <div class="section-label">Add events to</div>
+      <select id="cal-select">
+        <option value="">Loading your calendars...</option>
+      </select>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" id="drop-zone">
+      <div class="upload-zone-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <h2>Upload your timetable</h2>
+      <p>Drop an image here, or choose one of the options below</p>
+      <div class="upload-actions">
+        <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          From library
+        </button>
+        <button class="upload-btn" id="camera-btn" onclick="document.getElementById('camera-input').click()">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Camera
+        </button>
+        <button class="upload-btn primary" onclick="triggerPaste()">
+          <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          Paste screenshot
+        </button>
+      </div>
+    </div>
+
+    <p class="paste-hint">or press <kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd> anywhere to paste</p>
+
+    <input type="file" id="file-input" accept="image/*" onchange="handleFileInput(this)" />
+    <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleFileInput(this)" />
+
+    <!-- Image preview -->
+    <div id="preview-wrap">
+      <img id="preview-img" alt="timetable preview" />
+      <div class="preview-actions">
+        <span id="preview-name"></span>
+        <button class="btn-ghost" onclick="clearImage()" style="font-size:13px;">Remove</button>
+      </div>
+    </div>
+
+    <!-- Analyse button -->
+    <button id="process-btn" onclick="runParse()">
+      <svg style="width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      Analyse timetable
+    </button>
+
+    <!-- Status messages -->
+    <div class="status-bar" id="status-bar">
+      <svg viewBox="0 0 24 24" id="status-icon"></svg>
+      <span id="status-text"></span>
+    </div>
+
+    <!-- Parsed events -->
+    <div id="events-section" class="fade-in">
+      <div class="events-header">
+        <h3>Found events</h3>
+        <span class="tag tag-blue" id="event-count"></span>
+      </div>
+      <div class="events-list" id="events-list"></div>
+      <button id="push-btn" onclick="runPush()">
+        <svg style="width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Add to Google Calendar
+      </button>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="parser.js"></script>
+  <script src="calendar.js"></script>
+  <script>
+    let currentImageBase64 = null;
+    let currentMimeType = null;
+    let parsedEvents = [];
+
+    window.addEventListener('load', async () => {
+      if (!getToken()) return;
+      await loadUserInfo();
+      await loadCalendars();
+    });
+
+    async function loadUserInfo() {
+      const token = getToken();
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const user = await res.json();
+        document.getElementById('user-name').textContent = user.given_name || user.email || '';
+        const avatar = document.getElementById('user-avatar');
+        if (user.picture) {
+          avatar.src = user.picture;
+          avatar.style.display = 'block';
+        }
+      } catch {}
+    }
+
+    async function loadCalendars() {
+      const sel = document.getElementById('cal-select');
+      try {
+        const cals = await fetchCalendars();
+        sel.innerHTML = '';
+        cals.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.summary;
+          if (c.primary) opt.selected = true;
+          sel.appendChild(opt);
+        });
+      } catch (e) {
+        sel.innerHTML = '<option value="">Could not load calendars</option>';
+        showStatus('error', e.message);
+      }
+    }
+
+    function handleFileInput(input) {
+      const file = input.files[0];
+      if (file) loadImageFile(file);
+    }
+
+    function loadImageFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showStatus('error', 'Please upload an image file (JPG, PNG, WEBP, etc.)');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target.result;
+        currentMimeType = file.type;
+        // Strip the "data:image/png;base64," prefix
+        currentImageBase64 = result.split(',')[1];
+
+        document.getElementById('preview-img').src = result;
+        document.getElementById('preview-name').textContent = file.name;
+        document.getElementById('preview-wrap').style.display = 'block';
+        document.getElementById('process-btn').style.display = 'flex';
+        hideStatus();
+        clearEvents();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Handle Ctrl+V paste from clipboard
+    window.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          loadImageFile(item.getAsFile());
+          break;
+        }
+      }
+    });
+
+    function triggerPaste() {
+      showStatus('info', 'Press Ctrl+V (or Cmd+V on Mac) to paste your screenshot.');
+    }
+
+    // Drag and drop on the upload zone
+    const dropZone = document.getElementById('drop-zone');
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) loadImageFile(file);
+    });
+
+    async function runParse() {
+      if (!currentImageBase64) return;
+
+      const btn = document.getElementById('process-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Analysing...';
+      showStatus('info', 'Sending image to Claude for analysis...');
+      clearEvents();
+
+      try {
+        const result = await parseTimetableImage(currentImageBase64, currentMimeType);
+
+        if (!result.is_timetable) {
+          showStatus('error', "That doesn't look like a timetable. Please upload a photo of your school or university schedule.");
+          return;
+        }
+
+        if (!result.events || result.events.length === 0) {
+          showStatus('error', 'A timetable was detected but no events could be extracted. Try a clearer photo.');
+          return;
+        }
+
+        parsedEvents = result.events;
+        hideStatus();
+        renderEvents(parsedEvents);
+
+      } catch (e) {
+        showStatus('error', e.message || 'Something went wrong. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> Analyse timetable`;
+      }
+    }
+
+    function renderEvents(events) {
+      const list = document.getElementById('events-list');
+      list.innerHTML = '';
+
+      events.forEach(ev => {
+        const row = document.createElement('div');
+        row.className = 'event-row';
+        row.innerHTML = `
+          <span class="event-day">${ev.day.slice(0,3).toUpperCase()}</span>
+          <span class="event-title">${ev.title}</span>
+          <span class="event-time">${ev.start_time} – ${ev.end_time}</span>
+          ${ev.location ? `<span class="event-location">${ev.location}</span>` : ''}
+        `;
+        list.appendChild(row);
+      });
+
+      document.getElementById('event-count').textContent = events.length + ' events';
+      document.getElementById('events-section').style.display = 'block';
+    }
+
+    async function runPush() {
+      const calId = document.getElementById('cal-select').value;
+      if (!calId) { showStatus('error', 'Please select a calendar first.'); return; }
+      if (!parsedEvents.length) return;
+
+      const btn = document.getElementById('push-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Adding events...';
+      showStatus('info', 'Adding events to your calendar...');
+
+      try {
+        const results = await pushEventsToCalendar(calId, parsedEvents);
+        const msg = results.success + ' event(s) added successfully' +
+          (results.failed.length ? `. ${results.failed.length} failed: ${results.failed.join(', ')}` : '.');
+        showStatus(results.failed.length > 0 ? 'info' : 'success', msg);
+      } catch (e) {
+        showStatus('error', e.message || 'Failed to add events.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg style="width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Add to Google Calendar`;
+      }
+    }
+
+    function clearImage() {
+      currentImageBase64 = null;
+      currentMimeType = null;
+      document.getElementById('preview-wrap').style.display = 'none';
+      document.getElementById('process-btn').style.display = 'none';
+      document.getElementById('file-input').value = '';
+      document.getElementById('camera-input').value = '';
+      hideStatus();
+      clearEvents();
+    }
+
+    function clearEvents() {
+      parsedEvents = [];
+      document.getElementById('events-section').style.display = 'none';
+      document.getElementById('events-list').innerHTML = '';
+    }
+
+    function showStatus(type, message) {
+      const bar = document.getElementById('status-bar');
+      bar.className = 'status-bar ' + type;
+      document.getElementById('status-text').textContent = message;
+
+      const icons = {
+        info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+        error: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+        success: '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+      };
+      document.getElementById('status-icon').innerHTML = icons[type] || '';
+    }
+
+    function hideStatus() {
+      document.getElementById('status-bar').className = 'status-bar';
+    }
+  </script>
+</body>
+</html>
